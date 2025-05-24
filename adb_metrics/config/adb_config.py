@@ -19,7 +19,7 @@ class ADBConfig:
 
     def build_adb_command(self, device_serial: str = None) -> List[str]:
         # ADB should be available in PATH
-        cmd = ['./bin/adb']
+        cmd = ['adb']
 
         if self.host:
             cmd.extend(['-H', self.host])
