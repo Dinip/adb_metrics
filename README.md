@@ -11,7 +11,7 @@ A tool for collecting and monitoring Android device and application metrics via 
 - **Pattern Matching:** Target apps using wildcard patterns
 - **Multi-Pattern Support:** Monitor multiple app patterns simultaneously
 
-## Installation
+## Installation (Local Development/Run)
 
 1. Clone the repository
    ```bash
@@ -42,13 +42,51 @@ The tool can be configured via:
 ### Environment Variables
 
 ```
-ADB_HOST=127.0.0.1
-ADB_PORT=5037
-INFLUXDB_URL=http://localhost:8086
-INFLUXDB_TOKEN=your-influxdb-token
-INFLUXDB_ORG=your-organization
-INFLUXDB_BUCKET=android-metrics
+ADB_HOST="localhost"
+ADB_PORT="5037"
+INFLUXDB_URL="http://localhost:8086"
+INFLUXDB_TOKEN="admin_token"
+INFLUXDB_ORG="adb_monitoring"
+INFLUXDB_BUCKET="device_metrics"
+
+# Needed for InfluxDB 2 initial setup.
+# Remove if using already existing InfluxDB 2 instance.
+# Make sure you set secure password and admin token for production use.
+# Update docker-compose-prod.yml as needed.
+INFLUXDB_USERNAME="admin"
+INFLUXDB_PASSWORD="password"
+INFLUXDB_ADMIN_TOKEN="admin_token"
 ```
+
+### Grafana Configuration
+
+The project includes pre-configured Grafana dashboards to visualize your Android device metrics.
+
+1. Make sure your `.env` file is properly configured with your InfluxDB settings:
+   ```
+   INFLUXDB_ORG=your-organization
+   INFLUXDB_BUCKET=android_metrics
+   INFLUXDB_ADMIN_TOKEN=your-admin-token
+   ```
+
+2. Run the update references script to configure Grafana files with your environment settings:
+   ```bash
+   cd grafana
+   chmod +x update_references.sh  # Make the script executable (Linux/macOS only)
+   ./update_references.sh         # Linux/macOS
+   # or
+   bash update_references.sh      # Windows with Git Bash or WSL
+   ```
+
+3. The script will replace template variables in the Grafana configuration files with your actual values from the `.env`
+   file.
+
+4. Start Grafana with the provided configuration using docker-compose:
+   ```bash
+   docker-compose up -d
+   ```
+
+5. Access Grafana at http://localhost:3000 to view your Android device metrics dashboard.
 
 ## Usage
 
