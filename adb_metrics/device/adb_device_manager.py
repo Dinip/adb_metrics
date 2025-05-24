@@ -4,7 +4,7 @@ import logging
 from typing import List, Dict, Optional
 
 from adb_metrics.config.adb_config import adb_config
-from adb_metrics.device.android_metrics_collector import AndroidMetricsCollector
+from adb_metrics.device.android_metrics_collector import AndroidMetricsCollector, MetricPoint
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +49,7 @@ class ADBDeviceManager:
         return info
 
     @staticmethod
-    def collect_from_all_devices(app_patterns: Optional[List[str]]):
+    def collect_from_all_devices(app_patterns: Optional[List[str]]) -> List[MetricPoint]:
         devices = ADBDeviceManager.get_connected_devices()
 
         if not devices:

@@ -10,7 +10,7 @@ from adb_metrics.config.adb_config import adb_config
 from adb_metrics.config.config import config
 from adb_metrics.data.influxdb import InfluxDBPersistence, ConsolePrinter
 from adb_metrics.device.adb_device_manager import ADBDeviceManager
-from adb_metrics.device.android_metrics_collector import AndroidMetricsCollector
+from adb_metrics.device.android_metrics_collector import AndroidMetricsCollector, MetricPoint
 
 logging.basicConfig(
     level=logging.INFO,
@@ -19,14 +19,18 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def collect_and_print(device_id: Optional[str], app_patterns: Optional[List[str]]):
+def collect_metrics(device_id: Optional[str], app_patterns: Optional[List[str]]) -> List[MetricPoint]:
     if device_id:
         collector = AndroidMetricsCollector(device_id)
         metrics = collector.collect_all_metrics(app_patterns)
     else:
         metrics = ADBDeviceManager.collect_from_all_devices(app_patterns)
 
-    ConsolePrinter.print_metrics(metrics)
+    return metrics
+
+
+def collect_and_print(device_id: Optional[str], app_patterns: Optional[List[str]]):
+    ConsolePrinter.print_metrics(collect_metrics(device_id, app_patterns))
 
 
 def collect_and_persist(device_id: Optional[str], app_patterns: Optional[List[str]], interval: int):
@@ -41,11 +45,7 @@ def collect_and_persist(device_id: Optional[str], app_patterns: Optional[List[st
         logger.info(f"Configuration: {config}")
 
         while True:
-            if device_id:
-                collector = AndroidMetricsCollector(device_id)
-                metrics = collector.collect_all_metrics(app_patterns)
-            else:
-                metrics = ADBDeviceManager.collect_from_all_devices(app_patterns)
+            metrics = collect_metrics(device_id, app_patterns)
 
             if metrics:
                 success = persistence.write_metrics(metrics)
