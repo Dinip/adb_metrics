@@ -1,9 +1,14 @@
 name: Publish Docker image
 
 on:
-  release:
-    types: [published]
+  pull_request:
+    branches:
+      - 'main'
   push:
+    tags:
+      - 'v*'
+    branches:
+      - 'main'
 
 jobs:
   push_to_registry:
@@ -32,11 +37,11 @@ jobs:
           images: dinip/adb_metrics
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./Dockerfile
           platforms: linux/amd64,linux/arm64
-          push: true
+          push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
