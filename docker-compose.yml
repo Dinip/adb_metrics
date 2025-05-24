@@ -1,0 +1,56 @@
+services:
+  adb_metrics:
+    build: .
+    container_name: adb_metrics
+    restart: unless-stopped
+    env_file:
+      - .env
+    command: [ "persist", "--app-pattern", "*.google.*" ]
+    networks:
+      - adb_metrics
+
+  influxdb:
+    image: influxdb:2
+    container_name: influx
+    restart: unless-stopped
+    ports:
+      - "8086:8086"
+    env_file:
+      - .env
+    environment:
+      DOCKER_INFLUXDB_INIT_MODE: setup # Use 'setup' for initial setup, then remove this line for production
+      DOCKER_INFLUXDB_INIT_USERNAME: $INFLUXDB_USERNAME
+      DOCKER_INFLUXDB_INIT_PASSWORD: $INFLUXDB_PASSWORD
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: $INFLUXDB_ADMIN_TOKEN
+      DOCKER_INFLUXDB_INIT_ORG: $INFLUXDB_ORG
+      DOCKER_INFLUXDB_INIT_BUCKET: $INFLUXDB_BUCKET
+    volumes:
+      - influxdb_data:/var/lib/influxdb2
+      - influxdb_config:/etc/influxdb2
+    networks:
+      - adb_metrics
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_INSTALL_PLUGINS=grafana-clock-panel
+    networks:
+      - adb_metrics
+
+volumes:
+  influxdb_data:
+  influxdb_config:
+  grafana_data:
+
+networks:
+  adb_metrics:
