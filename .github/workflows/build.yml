@@ -10,6 +10,10 @@ on:
     branches:
       - 'main'
 
+env:
+  IMAGE_NAME: dinip/adb_metrics
+  IMAGE_NAME_TEST: dinip/adb_metrics:test
+
 jobs:
   push_to_registry:
     name: Push Docker image to Docker Hub
@@ -34,7 +38,23 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: dinip/adb_metrics
+          images: ${{ env.IMAGE_NAME }}
+
+      - name: Build and test Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: linux/amd64
+          push: false
+          load: true
+          tags: ${{ env.IMAGE_NAME_TEST }}
+
+      - name: Test Docker image
+        run: |
+          source .env.example
+          docker run --rm ${{ IMAGE_NAME_TEST }} print --help
+          docker run --rm ${{ IMAGE_NAME_TEST }} print --adb-test
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v6

@@ -67,3 +67,15 @@ class ADBDeviceManager:
             all_metrics.extend(metrics)
 
         return all_metrics
+
+    @staticmethod
+    def get_version() -> str:
+        try:
+            version_output = adb_config.run_adb_command("version")
+            if version_output:
+                return version_output.strip()
+            else:
+                return "Unknown"
+        except Exception as e:
+            logger.error(f"Error getting ADB version: {e}")
+            return "Unknown"

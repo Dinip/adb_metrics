@@ -79,6 +79,19 @@ def list_devices():
               f"(Android {device_info.get('android_version', 'Unknown')})")
 
 
+def test_adb_connection() -> bool:
+    print("=== ADB Functionality Test ===")
+    try:
+        version = ADBDeviceManager.get_version()
+        print(f"ADB Version: {version}")
+        print("\n✅ ADB is functioning correctly")
+        return True
+    except Exception as e:
+        print("\n❌ ADB test failed:")
+        print(f"Error: {e}")
+        return False
+
+
 def show_config():
     print("✅ Current Configuration:")
     print(config)
@@ -115,12 +128,22 @@ def main():
         type=int,
         help="ADB server port (overrides .env/environment)"
     )
+    parser.add_argument(
+        "--adb-test",
+        action="store_true",
+        help="Test ADB functionality by printing version and device information"
+    )
 
     args = parser.parse_args()
 
     # Update ADB configuration with CLI overrides
     if args.adb_host or args.adb_port:
         adb_config.update_config(host=args.adb_host, port=args.adb_port)
+
+    # If --adb-test flag is used, run the test and exit
+    if args.adb_test:
+        test_success = test_adb_connection()
+        sys.exit(0 if test_success else 1)
 
     if args.mode == "config":
         show_config()
