@@ -52,9 +52,8 @@ jobs:
 
       - name: Test Docker image
         run: |
-          source .env.example
-          docker run --rm ${{ env.IMAGE_NAME_TEST }} print --help
-          docker run --rm ${{ env.IMAGE_NAME_TEST }} print --adb-test
+          docker run --rm --env-file .env.example ${{ env.IMAGE_NAME_TEST }} print --help
+          docker run --rm --env-file .env.example ${{ env.IMAGE_NAME_TEST }} print --adb-test
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
